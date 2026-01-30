@@ -29,9 +29,8 @@ if ON_PYTHONANYWHERE:
     DEBUG = False
     ALLOWED_HOSTS = ['xluy1.pythonanywhere.com']
 else:
-    DEBAUG = True
+    DEBUG = True
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-
 
 # Application definition
 

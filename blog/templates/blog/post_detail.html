@@ -13,5 +13,16 @@
     {% endif %}
     <h1>{{ post.title }}</h1>
     <p>{{ post.text|linebreaksbr }}</p>
+    <h3>
+        {% if user.is_authenticated %}
+        <h3><a class="btn btn-default" href="{% url 'comment_new' pk=post.pk %}"><span class="glyphicon glyphicon-edit"></span></a> Comment</h3>
+        {% endif %}
+        {% for comment in comments %}
+        <div id="comment">
+            <h3>{{ comment.author }} <span class="date">{{ comment.pub_date }}</span></h3>
+            <p>{{ comment.text }}</p>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

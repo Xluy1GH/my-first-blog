@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.contrib.auth.models import User
 from .models import Post
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
@@ -11,7 +11,8 @@ def post_list(request):
 
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    return render(request, 'blog/post_detail.html', {'post': post})
+    comments = post.comments.all().order_by('-pub_date')
+    return render(request, 'blog/post_detail.html', {'post': post, "comments": comments})
 
 def post_new(request):
     if request.method == "POST":
@@ -49,11 +50,6 @@ def post_search(request):
     posts = []
 
     if query:
-        # results = Post.objects.filter(
-        #     Q(title__icontains=query) |
-        #     Q(text__icontains=query) |
-        #     Q(author__icontains=query)
-        # )
         user = User.objects.filter(username=query).first()
         posts = Post.objects.filter(
             Q(title__icontains=query) |
@@ -62,3 +58,23 @@ def post_search(request):
             ).order_by('-published_date')
 
     return render(request, 'blog/post_search.html', {'posts': posts})
+
+def comment_new(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.pub_date = timezone.now()
+            comment.post = post
+            comment.save()
+            
+            return redirect('post_detail', pk=pk)
+        
+    else:
+        form = CommentForm()
+
+    return render(request, 'blog/comment_new.html', {"form": form, "post": post})
